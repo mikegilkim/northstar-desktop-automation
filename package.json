@@ -1,0 +1,13 @@
+{
+  "name": "productivity-automation-desktop",
+  "version": "1.0.0",
+  "description": "Transparent, configurable desktop automation for productivity and demo use.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "electron": "^31.0.0"
+  }
+}

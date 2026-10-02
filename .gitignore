@@ -1,0 +1,10 @@
+node_modules/
+test/tmp-test-data/
+.env
+.env.*
+!.env.example
+*.log
+dist/
+out/
+.DS_Store
+npm-debug.log*

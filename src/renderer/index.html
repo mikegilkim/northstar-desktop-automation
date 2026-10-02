@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Northstar Ticket Monitor</title>
+    <link rel="stylesheet" href="/renderer/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">N</div>
+          <div>
+            <strong>Northstar</strong>
+            <small>Background service</small>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <button class="nav-item active" data-view="dashboard"><span>◉</span> Dashboard</button>
+          <button class="nav-item" data-view="profiles"><span>◍</span> Profiles</button>
+          <button class="nav-item" data-view="settings"><span>◕</span> Settings</button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="status-summary">
+            <span class="status-dot idle"></span>
+            <div>
+              <strong>Ticket monitor</strong>
+              <small>Visible windows only</small>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-layout">
+        <section id="dashboard-view" class="view-panel active">
+        <header class="topbar">
+          <div class="results-meta">
+            <span class="eyebrow">Ticket and message monitor</span>
+            <h1>Jira · Teams · Slack</h1>
+          </div>
+
+          <div class="topbar-actions">
+            <div class="status-pill" id="status-pill">
+              <span class="status-dot idle"></span>
+              <span id="status-text">Idle</span>
+            </div>
+            <button id="notification-bell" class="icon-button" aria-label="Notifications">
+              🔔
+              <span class="notification-count" id="notification-count">3</span>
+            </button>
+          </div>
+        </header>
+
+        <section class="toolbar">
+          <div class="primary-actions">
+            <button id="start-btn" class="primary-btn">Start monitor</button>
+            <button id="pause-btn" class="secondary-btn">Pause</button>
+            <button id="stop-btn" class="ghost-btn">Stop</button>
+          </div>
+
+          <div class="session-info">
+            <span>Session</span>
+            <strong id="session-duration">00:00:00</strong>
+          </div>
+        </section>
+
+        <section class="stats-grid">
+          <article class="stat-card">
+            <span class="stat-label">Mouse position</span>
+            <strong id="mouse-state">—</strong>
+            <small id="mouse-subtext">Waiting for telemetry</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Last result</span>
+            <strong id="keyboard-state">Ready</strong>
+            <small id="keyboard-subtext">No window checked yet</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Mouse movement samples</span>
+            <strong id="scroll-state">0</strong>
+            <small id="scroll-subtext">Observed cursor changes</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Window title</span>
+            <strong id="browser-state">—</strong>
+            <small id="browser-subtext">Focused app/window</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Window switches</span>
+            <strong id="session-state">0</strong>
+            <small>Since monitor start</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Monitor mode</span>
+            <strong id="intensity-state">Visible</strong>
+            <small>Visible window focus</small>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <div class="panel wide-panel">
+            <div class="panel-header">
+              <h2>Live activity</h2>
+              <span class="chip" id="active-profile-chip">Research</span>
+            </div>
+
+            <div class="activity-grid">
+              <div class="metric-block">
+                <label>Current target</label>
+                <strong id="current-app">Waiting</strong>
+              </div>
+              <div class="metric-block">
+                <label>Focused window</label>
+                <strong id="current-browser">—</strong>
+              </div>
+              <div class="metric-block">
+                <label>Next target</label>
+                <strong id="current-tab">Jira</strong>
+              </div>
+              <div class="metric-block">
+                <label>Window switches</label>
+                <strong id="simulated-actions">0</strong>
+              </div>
+              <div class="metric-block">
+                <label>Last focus result</label>
+                <strong id="mouse-events">0</strong>
+              </div>
+              <div class="metric-block">
+                <label>Last window check</label>
+                <strong id="keyboard-events">0</strong>
+              </div>
+              <div class="metric-block">
+                <label>Active app interval</label>
+                <strong id="scroll-events">0</strong>
+              </div>
+              <div class="metric-block">
+                <label>Rotation targets</label>
+                <strong id="switch-events">0</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Profiles</h2>
+            </div>
+            <div id="dashboard-profile-list" class="profile-list"></div>
+          </div>
+        </section>
+
+        <section class="lower-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Activity log</h2>
+              <div class="panel-actions">
+                <button class="mini-btn" id="clear-log-btn">Clear</button>
+                <button class="mini-btn" id="export-log-btn">Export</button>
+              </div>
+            </div>
+            <ul id="activity-log" class="activity-log"></ul>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Notifications</h2>
+              <button class="mini-btn" id="mark-read-btn">Mark read</button>
+            </div>
+            <ul id="notification-list" class="notification-list"></ul>
+          </div>
+        </section>
+        </section>
+
+        <section id="profiles-view" class="view-panel hidden">
+          <div class="panel full-width-panel">
+            <div class="panel-header">
+              <h2>Profile editor</h2>
+              <button class="mini-btn" id="new-profile-btn">New profile</button>
+            </div>
+
+            <div class="profile-editor-grid">
+              <form id="profile-form" class="editor-form">
+                <label>
+                  <span>Profile name</span>
+                  <input id="profile-name" type="text" value="Research" />
+                </label>
+                <label>
+                  <span>Description</span>
+                  <input id="profile-description" type="text" value="Search and review loop" />
+                </label>
+                <label>
+                  <span>Type</span>
+                  <input id="profile-type" type="text" value="Browser-focused" />
+                </label>
+                <label>
+                  <span>Intensity</span>
+                  <input id="profile-intensity" type="number" min="1" max="5" value="2" />
+                </label>
+                <button type="submit" class="primary-btn">Save profile</button>
+              </form>
+
+              <div class="profile-list-panel">
+                <h3>Saved profiles</h3>
+                <div id="saved-profile-list" class="profile-list"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="settings-view" class="view-panel hidden">
+          <div class="panel full-width-panel">
+            <div class="panel-header">
+              <h2>Settings</h2>
+            </div>
+
+            <form id="settings-form" class="editor-form settings-form">
+              <label>
+                <span>Default profile</span>
+                <select id="settings-default-profile">
+                  <option>Research</option>
+                  <option>Light Activity</option>
+                  <option>Demo Mode</option>
+                </select>
+              </label>
+              <label>
+                <span>Default browser</span>
+                <select id="settings-browser">
+                  <option>Chrome</option>
+                  <option>Edge</option>
+                  <option>Firefox</option>
+                </select>
+              </label>
+              <label>
+                <span>Intensity</span>
+                <input id="settings-intensity" type="number" min="1" max="5" value="2" />
+              </label>
+              <label>
+                <span>Emergency stop hotkey</span>
+                <input id="settings-hotkey" type="text" value="Ctrl+Alt+S" />
+              </label>
+              <label>
+                <span>Window title fragments, one per line</span>
+                <textarea id="settings-monitor-targets" rows="4" spellcheck="false">Jira
+Teams
+Slack</textarea>
+                <small>Open Jira, Teams, and Slack windows first. Northstar focuses visible matching windows; it does not read message content or send input.</small>
+              </label>
+              <fieldset class="interval-settings">
+                <legend>Time on each app before switching (10–3600 seconds)</legend>
+                <label>
+                  <span>Browser / Jira</span>
+                  <input id="settings-browser-interval" type="number" min="10" max="3600" value="30" />
+                </label>
+                <label>
+                  <span>Teams</span>
+                  <input id="settings-teams-interval" type="number" min="10" max="3600" value="30" />
+                </label>
+                <label>
+                  <span>Slack</span>
+                  <input id="settings-slack-interval" type="number" min="10" max="3600" value="30" />
+                </label>
+              </fieldset>
+              <fieldset class="interval-settings mouse-assist-settings">
+                <legend>Mouse telemetry and pointer position</legend>
+                <p>The dashboard samples cursor position. After each successful switch, Northstar smoothly glides the pointer into the focused window, then scrolls the configured number of wheel ticks. These are explicit, repeatable actions; no random gestures or clicks are generated.</p>
+                <label class="checkbox-row">
+                  <input id="settings-mouse-park" type="checkbox" checked />
+                  <span>Move pointer visibly after each app switch</span>
+                </label>
+                <label>
+                  <span>Pointer destination</span>
+                  <select id="settings-mouse-park-position">
+                    <option value="center" selected>Center content area</option>
+                    <option value="top-left">Top left</option>
+                    <option value="top-right">Top right</option>
+                    <option value="bottom-left">Bottom left</option>
+                    <option value="bottom-right">Bottom right</option>
+                  </select>
+                </label>
+                <label class="checkbox-row">
+                  <input id="settings-scroll-enabled" type="checkbox" checked />
+                  <span>Scroll after each app switch</span>
+                </label>
+                <label>
+                  <span>Scroll direction</span>
+                  <select id="settings-scroll-direction">
+                    <option value="down" selected>Down</option>
+                    <option value="up">Up</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Wheel ticks (1–5)</span>
+                  <input id="settings-scroll-ticks" type="number" min="1" max="5" value="1" />
+                </label>
+              </fieldset>
+              <p id="settings-save-status" role="status" aria-live="polite"></p>
+              <label class="checkbox-row">
+                <input id="settings-auto-start" type="checkbox" />
+                <span>Start automatically</span>
+              </label>
+              <label class="checkbox-row">
+                <input id="settings-start-minimized" type="checkbox" checked />
+                <span>Start minimized</span>
+              </label>
+              <button type="submit" class="primary-btn">Save settings</button>
+            </form>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="permission-modal" class="modal hidden">
+      <div class="modal-card">
+        <div class="panel-header">
+          <h2>Monitor setup</h2>
+          <button class="mini-btn" id="close-permissions-btn">Close</button>
+        </div>
+
+        <div class="permission-list">
+          <label class="permission-item">
+            <input type="checkbox" checked />
+            <span>
+              <strong>Visible window matching</strong>
+              <small>Cycles through open windows whose titles match your configured Jira, Teams, or Slack filters.</small>
+            </span>
+          </label>
+          <label class="permission-item">
+            <input type="checkbox" checked />
+            <span>
+              <strong>Foreground focus</strong>
+              <small>Brings a matching app/window forward so it can be seen on your display.</small>
+            </span>
+          </label>
+          <label class="permission-item">
+            <input type="checkbox" checked />
+            <span>
+              <strong>No simulated activity</strong>
+              <small>Northstar does not type, click, read messages, or change ticket data. Pointer glides and wheel scrolling are explicit, configurable viewing actions.</small>
+            </span>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button id="permission-continue-btn" class="primary-btn">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <a
+      class="social-orb"
+      href="https://www.facebook.com/mikegilkim"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Visit Mike Gil Kim on Facebook"
+      title="Facebook"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M13.6 21v-8.2h2.75l.41-3.2H13.6V7.56c0-.93.26-1.56 1.59-1.56h1.69V3.14A22.5 22.5 0 0 0 14.42 3c-2.43 0-4.09 1.49-4.09 4.23V9.6H7.58v3.2h2.75V21h3.27Z" />
+      </svg>
+    </a>
+
+    <script src="/engine/Randomizer.js"></script>
+    <script src="/engine/NotificationManager.js"></script>
+    <script src="/engine/ActivityLogger.js"></script>
+    <script src="/engine/SafetyManager.js"></script>
+    <script src="/engine/ProfileManager.js"></script>
+    <script src="/engine/MouseController.js"></script>
+    <script src="/engine/KeyboardController.js"></script>
+    <script src="/engine/ScrollController.js"></script>
+    <script src="/engine/BrowserController.js"></script>
+    <script src="/engine/WindowController.js"></script>
+    <script src="/engine/PermissionManager.js"></script>
+    <script src="/engine/AutomationEngine.js"></script>
+    <script src="/engine/AutomationController.js"></script>
+    <script src="/renderer/app.js"></script>
+  </body>
+</html>
